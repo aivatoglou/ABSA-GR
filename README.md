@@ -19,7 +19,7 @@ The text column contains the tweets, the target column contains the aspect extra
 The ensemble architecture consists of the Greek-BERT and XML-RoBERTa and two additional fully connected layers.
 ![Ensemble architecture](Figures/ensemble.png)
 
-The hybrid architecture consists of three bi-GRUs, a fully connected layer, and CapsNet alongside an aditional fully connected layer as the ensemble classifiers. (Note: the ensemble approach of the hybrid architecture is not depicted on the figure.)
+The hybrid architecture consists of the Greek-BERT, three bi-GRUs, a fully connected layer, and a CapsNet layer alongside an aditional fully connected layer as the ensemble classifiers. (Note: the ensemble approach of the hybrid architecture is not depicted on the figure.)
 ![Hybrid architecture](Figures/hybrid.png)
 
 

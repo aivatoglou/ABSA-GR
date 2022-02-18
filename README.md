@@ -28,16 +28,23 @@ foo@bar:~$ python3 main.py
 ```
 
 #### * Results *
-Ensemble methodology:
+
+<table>
+<tr><th> Ensemble methodology </th><th> Hybrid methodology </th></tr>
+<tr><td>
+  
 | Class  | F1-score |
 | ------------- | ------------- |
 | negative | 0.69  |
 | neutral  | 0.85  |
 | positive  | 0.54  |
 
-Hybrid methodology:
+</td><td>
+
 | Class  | F1-score |
 | ------------- | ------------- |
 | negative | 0.62  |
 | neutral  | 0.82  |
 | positive  | 0.54  |
+
+</td></tr> </table>

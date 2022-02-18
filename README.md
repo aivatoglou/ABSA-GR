@@ -12,13 +12,32 @@ The format of the data is the following:
 | :---: | :---: | :---: |
 | str | str | str |
 
-where text column contains the tweets, target column contains the aspect extracted from the tweets and sentiment contains the polarity of the tweet regarding the aspect and has one of the following five valus: -2 (very negative), -1 (negative), 0 (neutral), 1 (positive), 2 (very positive).
+where text column contains the tweets, target column contains the aspect extracted from the tweets and sentiment contains the polarity of the tweet regarding the aspect and has one of the following five values: -2 (very negative), -1 (negative), 0 (neutral), 1 (positive), 2 (very positive).
 
 #### Methodology
 The methodology takes advantage of neural machine translation techniques in order to deal with any imbalance problems.
 
 #### Requirements
+The environment of the experiments was implemented using Anaconcda. The dependencies are inside the environment.yml file.
 
 #### How to run
 
+"cd" to the appropriate folder and run:
+```console
+foo@bar:~$ python3 main.py
+```
+
 #### Results
+Ensemble methodology:
+| Class  | F1-score |
+| ------------- | ------------- |
+| negative | 0.69  |
+| neutral  | 0.85  |
+| positive  | 0.54  |
+
+Hybrid methodology:
+| Class  | F1-score |
+| ------------- | ------------- |
+| negative | 0.62  |
+| neutral  | 0.82  |
+| positive  | 0.54  |

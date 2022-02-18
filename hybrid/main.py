@@ -1,3 +1,7 @@
+import sys
+
+sys.path.append("../utils")
+
 import random
 import time
 from collections import Counter
@@ -6,21 +10,21 @@ import numpy as np
 import pandas as pd
 import torch
 import torch.optim as optim
+from data_prep import machine_translation
 from modelsummary import summary
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 from torch.cuda.amp import GradScaler
 from torch.utils.data import DataLoader, TensorDataset
 from transformers import BertModel, BertTokenizer, logging
-
-from bertGRU import BERTGRUSentiment
-from data_prep import machine_translation
-from train_model import epoch_time, evaluate, train
 from utils import (
     ImbalancedDatasetSampler,
     language_model_preprocessing,
     translated_preprocessing,
 )
+
+from bertGRU import BERTGRUSentiment
+from train_model import epoch_time, evaluate, train
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 print(f"Device for training: {device}")
@@ -49,7 +53,7 @@ torch.cuda.manual_seed_all(SEED)
 logging.set_verbosity_error()
 
 # Load dataset
-dataset = pd.read_csv("dataset.csv", index_col=False, sep="\t")
+dataset = pd.read_csv("../data/dataset.csv", index_col=False, sep="\t")
 
 # Labels convertion
 labels_dict = {"-2": 0, "-1": 1, "0": 2, "1": 3, "2": 4}

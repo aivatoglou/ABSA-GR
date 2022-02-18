@@ -1,10 +1,14 @@
 import random
 import sys
+
+sys.path.append("../utils")
+
 from collections import Counter
 
 import numpy as np
 import pandas as pd
 import torch
+from data_prep import machine_translation
 from sklearn.model_selection import train_test_split
 from sklearn.utils import resample, shuffle
 from torch.utils.data import DataLoader, TensorDataset
@@ -15,8 +19,8 @@ from transformers import (
     get_linear_schedule_with_warmup,
     logging,
 )
+from utils import language_model_preprocessing, translated_preprocessing
 
-from data_prep import machine_translation
 from train import (
     accuracy_per_class,
     evaluate_model,
@@ -24,7 +28,6 @@ from train import (
     test_model,
     train_model,
 )
-from utils import language_model_preprocessing, translated_preprocessing
 
 ########## HYPER-PARAMETERS ##########
 SEED = 0
@@ -50,7 +53,7 @@ device = "cuda:0" if torch.cuda.is_available() else "cpu"
 print(f"Device for training: {device}")
 
 # Load dataset
-dataset = pd.read_csv("dataset.csv", index_col=False, sep="\t")
+dataset = pd.read_csv("../data/dataset.csv", index_col=False, sep="\t")
 
 # Map labels - convert to 3-classes problem
 labels_dict = {"-2": 0, "-1": 0, "0": 1, "1": 2, "2": 2}
@@ -90,20 +93,28 @@ print(f"Test-set class balance: {Counter(test_data['sentiment'])}")
 
 if use_sampling:
 
-    # Data augmentation through neural machine translation
+    m_0 = train_data[train_data["sentiment"] == 0]  # 1671
+    m_1 = train_data[train_data["sentiment"] == 1]  # 4720
+    m_2 = train_data[train_data["sentiment"] == 2]  # 752
 
-    m_0 = train_data[train_data["sentiment"] == 0]
-    m_1 = train_data[train_data["sentiment"] == 1]
-    m_2 = train_data[train_data["sentiment"] == 2]
-
-    m_2_fr = machine_translation(m_2, "fr")
+    m_2_fr = machine_translation(m_2, "mul", "en")
     m_2 = pd.concat([m_2, m_2_fr])
 
-    m_0_fr = machine_translation(m_0, "fr")
+    m_2_fi = machine_translation(m_2, "el", "fr")
+    m_2 = pd.concat([m_2, m_2_fi])
+
+    m_0_fr = machine_translation(m_0, "mul", "en")
     m_0 = pd.concat([m_0, m_0_fr])
 
     train_data = pd.concat([m_0, m_1, m_2])
+
+    del m_0
+    del m_1
+    del m_2
+    torch.cuda.empty_cache()
+
     train_data["text"] = train_data["text"].apply(translated_preprocessing)
+    train_data["target"] = train_data["target"].apply(translated_preprocessing)
 
     ids_to_drop = []
     for index, row in train_data.iterrows():
@@ -112,8 +123,9 @@ if use_sampling:
 
     train_data = train_data[~train_data.index.isin(ids_to_drop)]
     train_data = train_data.reset_index(drop=True)
-    train_data = shuffle(train_data, random_state=SEED)
+    print(f"Samples removed: {len(ids_to_drop)}")
 
+    train_data = shuffle(train_data, random_state=SEED)
     print(f"Train set class balance after sampling: {Counter(train_data['sentiment'])}")
 
 ########## Greek-BERT initialization ##########

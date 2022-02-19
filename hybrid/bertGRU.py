@@ -4,6 +4,12 @@ from capsule_layer import CapsuleLinear
 
 
 class BERTGRUSentiment(nn.Module):
+
+    """The hybrid architecture.
+
+    Consists of the Greek-BERT, three bi-GRUs, a CapsNet and four fully connected layers in total.
+    """
+
     def __init__(self, bert, n_classes, batch_size):
 
         super().__init__()

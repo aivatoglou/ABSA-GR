@@ -5,6 +5,8 @@ from sklearn.metrics import classification_report, confusion_matrix, f1_score
 
 def train_model(bert_model, dataloader_train, optimizer, scheduler, device):
 
+    """The architecture's training routine."""
+
     bert_model.train()
     loss_train_total = 0
 
@@ -46,6 +48,8 @@ def train_model(bert_model, dataloader_train, optimizer, scheduler, device):
 
 
 def evaluate_model(dataloader_val, bert_model, device):
+
+    """The architecture's evaluation routine."""
 
     # evaluation mode
     bert_model.eval()
@@ -98,6 +102,8 @@ def evaluate_model(dataloader_val, bert_model, device):
 
 def test_model(dataloader_test, bert_model, device):
 
+    """The architecture's test routine."""
+
     bert_model.eval()
     predictions, true_vals = [], []
 
@@ -139,12 +145,16 @@ def test_model(dataloader_test, bert_model, device):
 
 def f1_score_func(preds, labels):
 
+    """Calculates the macro F1-score."""
+
     preds_flat = np.argmax(preds, axis=1).flatten()
     labels_flat = labels.flatten()
     return f1_score(labels_flat, preds_flat, average="macro")
 
 
 def accuracy_per_class(preds, labels):
+
+    """Calculates the accuracy per class."""
 
     # make prediction
     preds_flat = np.argmax(preds, axis=1).flatten()

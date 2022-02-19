@@ -8,6 +8,16 @@ def machine_translation(
     train_data: pd.DataFrame, language_model_1: str, language_model_2: str
 ) -> pd.DataFrame:
 
+    """Data augmentation through machine translation.
+
+    Keyword arguments:
+    train_data -- a pandas dataframe containing the text and the target (brand).
+    language_model_1 -- The source language for the translation (el or mul for multi-lingual models)
+    language_model_2 -- The target language for the translation.
+
+    Returns a new dataframe with the original and the augmented data.
+    """
+
     model = EasyNMT("opus-mt", max_loaded_models=5)
 
     # Mask the aspect in order to NOT be translated

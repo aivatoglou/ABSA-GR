@@ -1,16 +1,27 @@
 import re
 import unicodedata
-from typing import Callable
+from typing import Callable, List
 
 import pandas as pd
 import torch
 
 
 class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
+
+    """Class that handles the imbalance problem.
+    Acts as the sampler for the PyTorch dataloaders.
+
+    Keyword arguments:
+    dataset -- a pandas series containing the text.
+    labels_train: a list containing the labels.
+
+    Returns the indices used in the PyTorch dataloader.
+    """
+
     def __init__(
         self,
-        dataset,
-        labels_train,
+        dataset: pd.Series,
+        labels_train: list,
         indices: list = None,
         num_samples: int = None,
         callback_get_label: Callable = None,
@@ -40,7 +51,15 @@ class ImbalancedDatasetSampler(torch.utils.data.sampler.Sampler):
         return self.num_samples
 
 
-def language_model_preprocessing(text):
+def language_model_preprocessing(text: pd.Series) -> pd.Series:
+
+    """Text preprocessing function.
+
+    Keyword arguments:
+    text -- a pandas series containing the text.
+
+    Returns a new pd.Series with the pre-processed data.
+    """
 
     # Remove url
     text = re.sub(r"(\w+:\/\/\S+)", " ", text)
@@ -73,7 +92,15 @@ def language_model_preprocessing(text):
     return text
 
 
-def translated_preprocessing(text):
+def translated_preprocessing(text: pd.Series) -> pd.Series:
+
+    """Text preprocessing function (applied after machine translation).
+
+    Keyword arguments:
+    text -- a pandas series containing the text.
+
+    Returns a new pd.Series with the pre-processed data.
+    """
 
     # Remove digits
     text = re.sub(r"[~^0-9]", " ", text)

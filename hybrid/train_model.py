@@ -8,6 +8,8 @@ from torch.cuda.amp import autocast
 
 def epoch_time(start_time, end_time):
 
+    """Calculates the elapsed time between the epochs."""
+
     elapsed_time = end_time - start_time
     elapsed_mins = int(elapsed_time / 60)
     elapsed_secs = int(elapsed_time - (elapsed_mins * 60))
@@ -15,6 +17,8 @@ def epoch_time(start_time, end_time):
 
 
 def class_report(preds, y):
+
+    """Prints the classification report for the test set."""
 
     flat_preds = [x for sublist in preds for x in sublist]
     flat_truth = [x for sublist in y for x in sublist]
@@ -26,6 +30,8 @@ def class_report(preds, y):
 # Define binary_accuracy function
 def binary_accuracy(preds, y):
 
+    """Calculates the macro F1-score."""
+
     preds_flat = np.argmax(preds, axis=1).flatten()
     labels_flat = y.flatten()
 
@@ -34,6 +40,8 @@ def binary_accuracy(preds, y):
 
 # Define train function
 def train(model, iterator, optimizer, criterion, scaler, device):
+
+    """The architecture's training routine."""
 
     epoch_loss = 0
     epoch_acc = 0
@@ -52,7 +60,9 @@ def train(model, iterator, optimizer, criterion, scaler, device):
 
             loss = criterion(predictions, batch[3].to(torch.int64))
 
-            acc = binary_accuracy(predictions.detach().cpu().numpy(), batch[3].cpu().numpy())
+            acc = binary_accuracy(
+                predictions.detach().cpu().numpy(), batch[3].cpu().numpy()
+            )
 
         # Clip gradients
         torch.nn.utils.clip_grad_norm_(model.parameters(), 1)
@@ -69,6 +79,8 @@ def train(model, iterator, optimizer, criterion, scaler, device):
 
 
 def evaluate(model, iterator, criterion, device, print_report):
+
+    """The architecture's evaluation routine."""
 
     preds = []
     truth = []
@@ -90,9 +102,13 @@ def evaluate(model, iterator, criterion, device, print_report):
 
                 loss = criterion(predictions, batch[3].to(torch.int64))
 
-                acc = binary_accuracy(predictions.detach().cpu().numpy(), batch[3].cpu().numpy())
+                acc = binary_accuracy(
+                    predictions.detach().cpu().numpy(), batch[3].cpu().numpy()
+                )
 
-                preds_flat = np.argmax(predictions.detach().cpu().numpy(), axis=1).flatten()
+                preds_flat = np.argmax(
+                    predictions.detach().cpu().numpy(), axis=1
+                ).flatten()
                 preds.append(preds_flat)
                 truth.append(batch[3].cpu().numpy())
 

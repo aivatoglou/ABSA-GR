@@ -20,7 +20,7 @@ The ensemble architecture consists of the Greek-BERT and XML-RoBERTa and two add
 
 ![Ensemble architecture](Figures/ensemble.png)
 
-The hybrid architecture consists of the Greek-BERT, three bi-GRUs, a fully connected layer, and a CapsNet layer alongside an aditional fully connected layer as the ensemble classifiers. (Note: the ensemble approach of the hybrid architecture is not depicted on the figure.)
+The hybrid architecture consists of the Greek-BERT, three bi-GRUs, a fully connected layer, and a CapsNet layer alongside three aditional fully connected layer as the ensemble classifiers. (Note: the ensemble approach of the hybrid architecture is not depicted on the figure.)
 
 ![Hybrid architecture](Figures/hybrid.png)
 

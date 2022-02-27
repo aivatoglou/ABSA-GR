@@ -5,11 +5,14 @@ sys.path.append("../utils")
 import random
 import time
 from collections import Counter
+from typing import Callable
 
 import numpy as np
 import pandas as pd
 import torch
 import torch.optim as optim
+import torch.utils.data
+import torchvision
 from data_prep import machine_translation
 from modelsummary import summary
 from sklearn.model_selection import train_test_split
@@ -28,16 +31,10 @@ from train_model import epoch_time, evaluate, train
 
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 print(f"Device for training: {device}")
+
 logging.set_verbosity_error()
 
-from typing import Callable
-
-import pandas as pd
-import torch
-import torch.utils.data
-import torchvision
-
-########## Hyper-parameters ##########
+########## HYPER-PARAMETERS ##########
 BATCH_SIZE = 128
 LEARNING_RATE = 0.0005
 WEIGHT_DECAY = 0.1
@@ -45,7 +42,9 @@ N_EPOCHS = 100
 SEED = 0
 use_sampling = True
 classes = 3
+######################################
 
+# Control sources of randomness
 random.seed(SEED)
 np.random.seed(SEED)
 torch.manual_seed(SEED)
@@ -55,18 +54,13 @@ logging.set_verbosity_error()
 # Load dataset
 dataset = pd.read_csv("../data/dataset.csv", index_col=False, sep="\t")
 
-# Labels convertion
-labels_dict = {"-2": 0, "-1": 1, "0": 2, "1": 3, "2": 4}
+# Map labels - convert to 3-classes problem
+labels_dict = {"-2": 0, "-1": 0, "0": 1, "1": 2, "2": 2}
 dataset["sentiment"] = dataset["sentiment"].astype(int).astype(str)
 dataset["sentiment"] = dataset["sentiment"].map(labels_dict)
 dataset = dataset.reset_index(drop=True)
 
-labels_dict = {"0": 0, "1": 0, "2": 1, "3": 2, "4": 2}
-dataset["sentiment"] = dataset["sentiment"].astype(int).astype(str)
-dataset["sentiment"] = dataset["sentiment"].map(labels_dict)
-dataset = dataset.reset_index(drop=True)
-
-# Preprocessing
+# Dataset Preprocessing
 dataset["text"] = dataset["text"].apply(language_model_preprocessing)
 dataset["target"] = dataset["target"].apply(language_model_preprocessing)
 
@@ -99,9 +93,9 @@ print(f"Test-set class balance: {Counter(test_data['sentiment'])}")
 
 if use_sampling:
 
-    m_0 = train_data[train_data["sentiment"] == 0]  # 1671
-    m_1 = train_data[train_data["sentiment"] == 1]  # 4720
-    m_2 = train_data[train_data["sentiment"] == 2]  # 752
+    m_0 = train_data[train_data["sentiment"] == 0]  # 1671 samples
+    m_1 = train_data[train_data["sentiment"] == 1]  # 4720 samples
+    m_2 = train_data[train_data["sentiment"] == 2]  # 752  samples
 
     m_2_fr = machine_translation(m_2, "mul", "en")
     m_2 = pd.concat([m_2, m_2_fr])
@@ -114,6 +108,7 @@ if use_sampling:
 
     train_data = pd.concat([m_0, m_1, m_2])
 
+    # Free some resources from GPU
     del m_0
     del m_1
     del m_2

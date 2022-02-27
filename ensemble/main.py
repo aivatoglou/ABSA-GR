@@ -93,9 +93,9 @@ print(f"Test-set class balance: {Counter(test_data['sentiment'])}")
 
 if use_sampling:
 
-    m_0 = train_data[train_data["sentiment"] == 0]  # 1671
-    m_1 = train_data[train_data["sentiment"] == 1]  # 4720
-    m_2 = train_data[train_data["sentiment"] == 2]  # 752
+    m_0 = train_data[train_data["sentiment"] == 0]  # 1671 samples
+    m_1 = train_data[train_data["sentiment"] == 1]  # 4720 samples
+    m_2 = train_data[train_data["sentiment"] == 2]  # 752  samples
 
     m_2_fr = machine_translation(m_2, "mul", "en")
     m_2 = pd.concat([m_2, m_2_fr])
@@ -108,11 +108,13 @@ if use_sampling:
 
     train_data = pd.concat([m_0, m_1, m_2])
 
+    # Free some resources from GPU
     del m_0
     del m_1
     del m_2
     torch.cuda.empty_cache()
 
+    # Again, text preprocessing on the translated text
     train_data["text"] = train_data["text"].apply(translated_preprocessing)
     train_data["target"] = train_data["target"].apply(translated_preprocessing)
 
@@ -132,12 +134,11 @@ if use_sampling:
 
 tokenizer_bert = AutoTokenizer.from_pretrained(language_model_1)
 tokenizer_bert._pad_token_type_id = 0
-aux_sentence = "target"
 
 # Tokenize train and test sets
 encoded_data_train = tokenizer_bert(
     train_data["text"].tolist(),
-    train_data[aux_sentence].tolist(),
+    train_data["target"].tolist(),
     return_tensors="pt",
     padding=True,
     truncation=True,
@@ -149,7 +150,7 @@ encoded_data_train = tokenizer_bert(
 
 encoded_data_test = tokenizer_bert(
     test_data["text"].tolist(),
-    test_data[aux_sentence].tolist(),
+    test_data["target"].tolist(),
     return_tensors="pt",
     padding=True,
     truncation=True,
@@ -161,7 +162,7 @@ encoded_data_test = tokenizer_bert(
 
 encoded_data_val = tokenizer_bert(
     val_data["text"].tolist(),
-    val_data[aux_sentence].tolist(),
+    val_data["target"].tolist(),
     return_tensors="pt",
     padding=True,
     truncation=True,
@@ -171,31 +172,27 @@ encoded_data_val = tokenizer_bert(
     return_attention_mask=True,
 )
 
-labels = "sentiment"
-
 # Train-set
 input_ids_train = encoded_data_train["input_ids"]
 attention_masks_train = encoded_data_train["attention_mask"]
 token_type_ids_train = encoded_data_train["token_type_ids"]
-labels_train = torch.tensor(train_data[labels].tolist())
+labels_train = torch.tensor(train_data["sentiment"].tolist())
 
 # Test-set
 input_ids_test = encoded_data_test["input_ids"]
 attention_masks_test = encoded_data_test["attention_mask"]
 token_type_ids_test = encoded_data_test["token_type_ids"]
-labels_test = torch.tensor(test_data[labels].tolist())
+labels_test = torch.tensor(test_data["sentiment"].tolist())
 
 # Validation-set
 input_ids_val = encoded_data_val["input_ids"]
 attention_masks_val = encoded_data_val["attention_mask"]
 token_type_ids_val = encoded_data_val["token_type_ids"]
-labels_val = torch.tensor(val_data[labels].tolist())
-
-num_labels = len(dataset["sentiment"].unique())
+labels_val = torch.tensor(val_data["sentiment"].tolist())
 
 classifier_1 = BertForSequenceClassification.from_pretrained(
     language_model_1,
-    num_labels=num_labels,
+    num_labels=len(dataset["sentiment"].unique()),
     output_attentions=False,
     output_hidden_states=False,
 )
@@ -235,12 +232,11 @@ scheduler_bert = get_linear_schedule_with_warmup(
 
 tokenizer_roberta = AutoTokenizer.from_pretrained(language_model_2)
 tokenizer_roberta._pad_token_type_id = 0
-aux_sentence = "target"
 
 # Tokenize train and test sets
 encoded_data_train = tokenizer_roberta(
     train_data["text"].tolist(),
-    train_data[aux_sentence].tolist(),
+    train_data["target"].tolist(),
     return_tensors="pt",
     padding=True,
     truncation=True,
@@ -252,7 +248,7 @@ encoded_data_train = tokenizer_roberta(
 
 encoded_data_test = tokenizer_roberta(
     test_data["text"].tolist(),
-    test_data[aux_sentence].tolist(),
+    test_data["target"].tolist(),
     return_tensors="pt",
     padding=True,
     truncation=True,
@@ -264,7 +260,7 @@ encoded_data_test = tokenizer_roberta(
 
 encoded_data_val = tokenizer_roberta(
     val_data["text"].tolist(),
-    val_data[aux_sentence].tolist(),
+    val_data["target"].tolist(),
     return_tensors="pt",
     padding=True,
     truncation=True,
@@ -274,36 +270,34 @@ encoded_data_val = tokenizer_roberta(
     return_attention_mask=True,
 )
 
-labels = "sentiment"
-
 # Train-set
 input_ids_train = encoded_data_train["input_ids"]
 attention_masks_train = encoded_data_train["attention_mask"]
 token_type_ids_train = encoded_data_train["token_type_ids"]
-labels_train = torch.tensor(train_data[labels].tolist())
+labels_train = torch.tensor(train_data["sentiment"].tolist())
 
 # Test-set
 input_ids_test = encoded_data_test["input_ids"]
 attention_masks_test = encoded_data_test["attention_mask"]
 token_type_ids_test = encoded_data_test["token_type_ids"]
-labels_test = torch.tensor(test_data[labels].tolist())
+labels_test = torch.tensor(test_data["sentiment"].tolist())
 
 # Validation-set
 input_ids_val = encoded_data_val["input_ids"]
 attention_masks_val = encoded_data_val["attention_mask"]
 token_type_ids_val = encoded_data_val["token_type_ids"]
-labels_val = torch.tensor(val_data[labels].tolist())
+labels_val = torch.tensor(val_data["sentiment"].tolist())
 
-num_labels = len(dataset["sentiment"].unique())
 classifier_2 = BertForSequenceClassification.from_pretrained(
     language_model_2,
-    num_labels=num_labels,
+    num_labels=len(dataset["sentiment"].unique()),
     output_attentions=False,
     output_hidden_states=False,
 )
 
 classifier_2.to(device)
 
+"""
 # Freeze BERT layers
 for name, param in classifier_1.named_parameters():
     if name.startswith("bert"):
@@ -313,6 +307,7 @@ for name, param in classifier_1.named_parameters():
 for name, param in classifier_2.named_parameters():
     if name.startswith("bert"):
         param.requires_grad = False
+"""
 
 # Train dataloader
 dataset_train = TensorDataset(

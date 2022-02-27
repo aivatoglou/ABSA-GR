@@ -37,6 +37,7 @@ Given the dataset as a csv file to the corresponding folder, after just "cd" to 
 ```console
 foo@bar:~$ python3 main.py
 ```
+Please note that if the dataset is in a language rather than the Greek, you should change the source language of the machine translator from the main.py and from utils/data_prep.py files. By default, the source and the target languages are set in Greek, with two intermidiate languages for translations, French and Enligsh.
 
 #### * Results *
 
